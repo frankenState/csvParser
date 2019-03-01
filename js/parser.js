@@ -23,8 +23,7 @@ function out(text) {
 	$('output').value = text;
 }
 
-$('laravel').onclick = ((data) => {
-
+function getClean(){
 	let input_text = $('input').value;
 
 	let percolumn = toArray(input_text, "\n");
@@ -48,6 +47,33 @@ $('laravel').onclick = ((data) => {
 		return header;
 	});
 
+	return clean;
+}
+
+$('mysql').onclick = ((data) => {
+
+	let clean = getClean();
+
+	let table = $('entity').value.toLowerCase();
+
+	let code = `INSERT INTO \`${ table }\`( ${ clean[0].map( e => '`' + e + '`').join() } ) VALUES\n`;
+
+	for (let i = 1; i < clean.length; i++){
+
+		code += `(${ clean[i].map( e => '`' +  e  + '`' ).join() }),\n`;
+
+	}
+
+
+	out(code.substring( 0 , code.length - 2 ) + ';');
+	
+
+});
+
+$('laravel').onclick = ((data) => {
+
+	let clean = getClean();
+
 	// parse it into Laravel save()
 	let model = $('entity').value;
 
@@ -60,11 +86,11 @@ $('laravel').onclick = ((data) => {
 
 		code += `$${ model.toLowerCase() } = new ${ model }();\n`;
 
-		let column = clean[i];
+		let row = clean[i];
 
-		for ( let j = 0; j < column.length; j++ ){
+		for ( let j = 0; j < row.length; j++ ){
 
-			code += `$${ model.toLowerCase() }->${ header[j] } = "${ column[j] }";\n`;
+			code += `$${ model.toLowerCase() }->${ header[j] } = "${ row[j] }";\n`;
 
 		}
 
